@@ -32,6 +32,17 @@ El proyecto utiliza una arquitectura basada en contenedores Docker:
 
 ## Instalación
 
+### Configurar variables de entorno
+
+Copia el archivo de ejemplo y genera la clave de aplicación:
+
+```bash
+cp .env.example .env
+docker compose run --rm app php artisan key:generate
+```
+
+> Las credenciales de la base de datos ya están configuradas en `.env.example`.
+
 ### Levantar contenedores
 
 ```bash
