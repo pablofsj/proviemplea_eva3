@@ -80,7 +80,7 @@ http://localhost:8000
 ### Health Check
 
 ```text
-http://localhost:8000/api/health
+http://localhost:8000/api/documentation#/Health
 ```
 
 ### Swagger UI
