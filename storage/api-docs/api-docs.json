@@ -1,0 +1,892 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API ProviEmplea EVA3",
+        "description": "API para gestión de candidatos con CV ciego, empresas, relación empresa-candidato y salud de la API.\n\n**Rate Limiting:** 60 requests/minuto por IP.\n**Caché:** Endpoints GET cacheados por 5 minutos.\n**Tiempo de respuesta objetivo:** < 200ms.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000/api",
+            "description": "Servidor local Docker"
+        }
+    ],
+    "paths": {
+        "/candidatos": {
+            "get": {
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Listar candidatos",
+                "description": "Obtiene todos los candidatos usando CV ciego. No retorna nombre, email, teléfono, edad, género ni comuna.",
+                "operationId": "0ec810ccabcaed118fdedde772f1255d",
+                "responses": {
+                    "200": {
+                        "description": "Lista de candidatos obtenida correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CandidatoPublico"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Crear candidato",
+                "description": "Crea un candidato guardando datos privados, pero las respuestas mantienen el formato de CV ciego.",
+                "operationId": "a9e458e368ac996c35d95125efe8bc44",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CandidatoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Candidato creado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CandidatoPublico"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            }
+        },
+        "/candidatos/{id}": {
+            "get": {
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Obtener candidato por ID",
+                "description": "Obtiene un candidato específico mediante CV ciego.",
+                "operationId": "d962389ca35587c72c9f7ea3dcef16ba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del candidato",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Candidato encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CandidatoPublico"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Candidato no encontrado"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Actualizar candidato",
+                "description": "Actualiza los datos de un candidato. La respuesta mantiene el CV ciego.",
+                "operationId": "0aecc4523bf38b0ae4c15e94dbf4ae67",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del candidato",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CandidatoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Candidato actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CandidatoPublico"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Candidato no encontrado"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Eliminar candidato",
+                "description": "Elimina un candidato por ID.",
+                "operationId": "1d85752cbc063a65a60a0ef5026f4ee9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del candidato",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Candidato eliminado correctamente"
+                    },
+                    "404": {
+                        "description": "Candidato no encontrado"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            }
+        },
+        "/candidatos/{id}/estado": {
+            "patch": {
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Activar o desactivar candidato",
+                "description": "Permite encender o apagar el estado del candidato.",
+                "operationId": "ed1ed12396eb482ba308e25b6c309789",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del candidato",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "estado"
+                                ],
+                                "properties": {
+                                    "estado": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estado actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CandidatoPublico"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Candidato no encontrado"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/empresa-candidatos": {
+            "get": {
+                "tags": [
+                    "Empresa-Candidatos"
+                ],
+                "summary": "Listar relaciones empresa-candidato",
+                "description": "Obtiene todas las relaciones entre empresas y candidatos.",
+                "operationId": "5041086b9f6cea43c5c3ecc7d4fcad80",
+                "responses": {
+                    "200": {
+                        "description": "Lista de relaciones obtenida correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EmpresaCandidato"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Empresa-Candidatos"
+                ],
+                "summary": "Crear relación empresa-candidato",
+                "description": "Registra que una empresa está interesada en un candidato para un cargo específico.",
+                "operationId": "548260aac9cf39272d4e433d93673018",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmpresaCandidato"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Relación creada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmpresaCandidato"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            }
+        },
+        "/empresa-candidatos/{id}": {
+            "get": {
+                "tags": [
+                    "Empresa-Candidatos"
+                ],
+                "summary": "Obtener relación por ID",
+                "description": "Obtiene una relación específica entre empresa y candidato.",
+                "operationId": "caabd2ed047a7f2535456daf75a2f9ea",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la relación",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Relación encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmpresaCandidato"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Relación no encontrada"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Empresa-Candidatos"
+                ],
+                "summary": "Actualizar relación empresa-candidato",
+                "description": "Actualiza el cargo buscado, estado del proceso u observación de la relación.",
+                "operationId": "9b819881a8f32c4984c174e5af71f17c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la relación",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmpresaCandidato"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Relación actualizada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmpresaCandidato"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Relación no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Empresa-Candidatos"
+                ],
+                "summary": "Eliminar relación empresa-candidato",
+                "description": "Elimina una relación entre empresa y candidato.",
+                "operationId": "73d650e610a2275ff43f3f6222b8b85d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la relación",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Relación eliminada correctamente"
+                    },
+                    "404": {
+                        "description": "Relación no encontrada"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            }
+        },
+        "/empresas": {
+            "get": {
+                "tags": [
+                    "Empresas"
+                ],
+                "summary": "Listar empresas",
+                "description": "Obtiene todas las empresas registradas en la plataforma.",
+                "operationId": "22631014ece23858d19a7ef1c89f0e78",
+                "responses": {
+                    "200": {
+                        "description": "Lista de empresas obtenida correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Empresa"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Empresas"
+                ],
+                "summary": "Crear empresa",
+                "description": "Registra una nueva empresa en la plataforma.",
+                "operationId": "edd395f6abdaa55cb0284b3b198d7ad6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Empresa"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Empresa creada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Empresa"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            }
+        },
+        "/empresas/{id}": {
+            "get": {
+                "tags": [
+                    "Empresas"
+                ],
+                "summary": "Obtener empresa por ID",
+                "description": "Obtiene una empresa específica mediante su ID.",
+                "operationId": "1ab6ccd465b58367f4064aa417a103be",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Empresa encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Empresa"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Empresas"
+                ],
+                "summary": "Actualizar empresa",
+                "description": "Actualiza los datos de una empresa registrada.",
+                "operationId": "b61661cfb086a49afd6ebebf15ed6011",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Empresa"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Empresa actualizada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Empresa"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Empresas"
+                ],
+                "summary": "Eliminar empresa",
+                "description": "Elimina una empresa por ID.",
+                "operationId": "56b2aac859ceb472597b45436c7f5f12",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Empresa eliminada correctamente"
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada"
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            }
+        },
+        "/empresas/{id}/estado": {
+            "patch": {
+                "tags": [
+                    "Empresas"
+                ],
+                "summary": "Activar o desactivar empresa",
+                "description": "Permite encender o apagar el estado de una empresa.",
+                "operationId": "ce6108b8c25f010a6a62a4fd5ed70b50",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la empresa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "estado"
+                                ],
+                                "properties": {
+                                    "estado": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estado actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Empresa"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Empresa no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Verificar estado de salud de la API",
+                "description": "Retorna el estado de la API y la conexión con la base de datos.",
+                "operationId": "e53beb71c0a2b506f4dc41fdded20d7a",
+                "responses": {
+                    "200": {
+                        "description": "API funcionando correctamente"
+                    },
+                    "500": {
+                        "description": "Error de conexión con la base de datos"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CandidatoPublico": {
+                "title": "Candidato público",
+                "description": "Respuesta pública del candidato usando CV ciego. No incluye nombre, email, teléfono, edad, género ni comuna.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nivel_educacional": {
+                        "type": "string",
+                        "example": "Técnico Nivel Superior"
+                    },
+                    "experiencia_laboral": {
+                        "type": "string",
+                        "example": "3 años en soporte técnico"
+                    },
+                    "habilidades": {
+                        "type": "string",
+                        "example": "PHP, Laravel, MySQL"
+                    },
+                    "certificaciones": {
+                        "type": "string",
+                        "example": "Certificación Desarrollo Backend"
+                    },
+                    "referencias": {
+                        "type": "string",
+                        "example": "Referencia laboral disponible"
+                    },
+                    "estado": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "CandidatoRequest": {
+                "title": "Crear candidato",
+                "required": [
+                    "nombre",
+                    "email",
+                    "nivel_educacional",
+                    "experiencia_laboral",
+                    "habilidades"
+                ],
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "juan@test.cl"
+                    },
+                    "telefono": {
+                        "type": "string",
+                        "example": "+56911111111"
+                    },
+                    "edad": {
+                        "type": "integer",
+                        "example": 28
+                    },
+                    "genero": {
+                        "type": "string",
+                        "example": "Masculino"
+                    },
+                    "comuna_residencia": {
+                        "type": "string",
+                        "example": "Providencia"
+                    },
+                    "nivel_educacional": {
+                        "type": "string",
+                        "example": "Universitario completo"
+                    },
+                    "experiencia_laboral": {
+                        "type": "string",
+                        "example": "3 años como desarrollador backend"
+                    },
+                    "habilidades": {
+                        "type": "string",
+                        "example": "PHP, Laravel, MySQL"
+                    },
+                    "certificaciones": {
+                        "type": "string",
+                        "example": "AWS Practitioner"
+                    },
+                    "referencias": {
+                        "type": "string",
+                        "example": "Empresa ABC"
+                    }
+                },
+                "type": "object"
+            },
+            "Empresa": {
+                "title": "Empresa",
+                "required": [
+                    "rut_empresa",
+                    "nombre_empresa",
+                    "rubro",
+                    "email_contacto"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "rut_empresa": {
+                        "type": "string",
+                        "example": "76.123.456-7"
+                    },
+                    "nombre_empresa": {
+                        "type": "string",
+                        "example": "Tech Solutions"
+                    },
+                    "rubro": {
+                        "type": "string",
+                        "example": "Tecnología"
+                    },
+                    "email_contacto": {
+                        "type": "string",
+                        "example": "rrhh@techsolutions.cl"
+                    },
+                    "telefono": {
+                        "type": "string",
+                        "example": "+56222222222"
+                    },
+                    "beneficios": {
+                        "type": "string",
+                        "example": "Seguro complementario, trabajo remoto"
+                    },
+                    "estado": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "EmpresaCandidato": {
+                "title": "Empresa Candidato",
+                "required": [
+                    "empresa_id",
+                    "candidato_id",
+                    "cargo_buscado"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "candidato_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "cargo_buscado": {
+                        "type": "string",
+                        "example": "Backend Developer"
+                    },
+                    "estado_proceso": {
+                        "type": "string",
+                        "example": "Pendiente"
+                    },
+                    "observacion": {
+                        "type": "string",
+                        "example": "Perfil interesante para entrevista"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Health",
+            "description": "Salud de la API"
+        },
+        {
+            "name": "Candidatos",
+            "description": "CRUD de candidatos con CV ciego"
+        },
+        {
+            "name": "Empresas",
+            "description": "CRUD de empresas"
+        },
+        {
+            "name": "Empresa-Candidatos",
+            "description": "Relación entre empresas y candidatos"
+        }
+    ]
+}
