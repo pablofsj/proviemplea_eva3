@@ -83,7 +83,7 @@ http://localhost:8000
 http://localhost:8000/api/documentation#/Health
 ```
 
-### Swagger UI
+### Swagger UI disponibilizando endpoints
 
 ```text
 http://localhost:8000/api/documentation
